@@ -1,4 +1,26 @@
 import { createMachine } from 'xstate';
 
-// Use the machine you created in Exercise 00
-// export const timerMachine = // ...
+export const timerMachineConfig = {
+    initial: 'idle',
+    states: {
+        'idle': {
+            on: {
+                "TOOGLE": 'running'
+            }
+        },
+        'running': {
+            on: {
+                "TOOGLE": 'paused'
+            }
+        },
+        'paused': {
+            on: {
+                "TOOGLE": 'running',
+                "RESET": 'idle'
+            }
+        }
+    }
+};
+
+export const timerMachine = createMachine(timerMachineConfig);
+
