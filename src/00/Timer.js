@@ -5,16 +5,24 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ProgressCircle } from '../ProgressCircle';
 
 // Import the timer machine and its initial state:
-// import { ... } from './timerMachine';
+import { timerMachine, timerMachineConfig } from './timerMachine';
 
 export const Timer = () => {
-  const state = ''; // delete me - useReducer instead!
+  const [state, dispatch] = useReducer(timerMachine, timerMachineConfig.initital);
 
   const { duration, elapsed, interval } = {
     duration: 60,
     elapsed: 0,
     interval: 0.1,
   };
+
+  function toggleTimer() {
+    dispatch({ type: "TOOGLE"});
+  }
+
+  function resetTimer() {
+    dispatch({ type: "RESET"});
+  }
 
   return (
     <div
@@ -35,40 +43,32 @@ export const Timer = () => {
         <div className="label">{state}</div>
         <div
           className="elapsed"
-          onClick={() => {
-            // ...
-          }}
+          onClick={toggleTimer}
         >
           {Math.ceil(duration - elapsed)}
         </div>
-        <div className="controls">
+        {state === "paused" && <div className="controls">
           <button
-            onClick={() => {
-              // ...
-            }}
+              onClick={resetTimer}
           >
             Reset
           </button>
-        </div>
+        </div>}
       </div>
       <div className="actions">
-        <button
-          onClick={() => {
-            // ...
-          }}
-          title="Pause timer"
+        {state === "running" && <button
+            onClick={toggleTimer}
+            title="Pause timer"
         >
           <FontAwesomeIcon icon={faPause} />
-        </button>
+        </button>}
 
-        <button
-          onClick={() => {
-            // ...
-          }}
-          title="Start timer"
+        {(state === "paused" || state === "idle") && <button
+            onClick={toggleTimer}
+            title="Start timer"
         >
           <FontAwesomeIcon icon={faPlay} />
-        </button>
+        </button>}
       </div>
     </div>
   );

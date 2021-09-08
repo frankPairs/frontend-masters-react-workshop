@@ -1,13 +1,25 @@
 export const timerMachineConfig = {
-  // ...
+  initital: 'idle',
+  states: {
+    'idle': {
+      on: {
+        "TOOGLE": 'running'
+      }
+    },
+    'running': {
+      on: {
+        "TOOGLE": 'paused'
+      }
+    },
+    'paused': {
+      on: {
+        "TOOGLE": 'running',
+        "RESET": 'idle'
+      }
+    }
+  }
 };
 
 export const timerMachine = (state, event) => {
-  // Add the logic that will read the timerMachineConfig
-  // and return the next state, given the current state
-  // and event received
-
-  // ...
-
-  return state;
+  return timerMachineConfig.states[state].on[event.type] || state;
 };
