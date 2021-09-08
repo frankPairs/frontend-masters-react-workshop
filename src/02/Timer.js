@@ -8,18 +8,25 @@ import { ProgressCircle } from '../ProgressCircle';
 
 export const Timer = () => {
   const [state, send] = useMachine(timerMachine);
+  const { value, context } = state;
+  const { duration, elapsed, interval } = context;
 
-  // Use state.context instead
-  const { duration, elapsed, interval } = {
-    duration: 60,
-    elapsed: 0,
-    interval: 0.1,
-  };
+  function toggleTimer() {
+    send({ type: 'TOGGLE' });
+  }
+
+  function resetTimer() {
+    send({ type: 'RESET' });
+  }
+
+  function addOneMinute() {
+    send({ type: 'ADD_MINUTE' });
+  }
 
   return (
     <div
       className="timer"
-      data-state={state.value}
+      data-state={value}
       style={{
         // @ts-ignore
         '--duration': duration,
@@ -32,33 +39,31 @@ export const Timer = () => {
       </header>
       <ProgressCircle />
       <div className="display">
-        <div className="label">{state.value}</div>
-        <div className="elapsed" onClick={() => send({ type: 'TOGGLE' })}>
+        <div className="label">{value}</div>
+        <div className="elapsed" onClick={toggleTimer}>
           {Math.ceil(duration - elapsed)}
         </div>
         <div className="controls">
-          {state.value !== 'running' && (
-            <button onClick={() => send('RESET')}>Reset</button>
+          {value !== 'running' && (
+            <button onClick={resetTimer}>Reset</button>
           )}
 
           <button
-            onClick={() => {
-              // ...
-            }}
+            onClick={addOneMinute}
           >
             + 1:00
           </button>
         </div>
       </div>
       <div className="actions">
-        {state.value === 'running' && (
-          <button onClick={() => send({ type: 'TOGGLE' })} title="Pause timer">
+        {value === 'running' && (
+          <button onClick={toggleTimer} title="Pause timer">
             <FontAwesomeIcon icon={faPause} />
           </button>
         )}
 
-        {(state.value === 'paused' || state.value === 'idle') && (
-          <button onClick={() => send({ type: 'TOGGLE' })} title="Start timer">
+        {(value === 'paused' || value === 'idle') && (
+          <button onClick={toggleTimer} title="Start timer">
             <FontAwesomeIcon icon={faPlay} />
           </button>
         )}
