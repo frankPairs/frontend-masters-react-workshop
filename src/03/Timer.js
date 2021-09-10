@@ -13,8 +13,27 @@ export const Timer = () => {
 
   const { duration, elapsed, interval } = state.context;
 
-  // Add a useEffect(...) here to send a TICK event on every `interval`
-  // ...
+  useEffect(() => {
+    const intervalId = setInterval(incrementElapsed, 1000 * interval);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  function incrementElapsed() {
+    send({ type: 'TICK' });
+  }
+
+  function addMinute() {
+    send({ type: 'ADD_MINUTE' });
+  }
+
+  function toggleTimer() {
+    send({ type: 'TOGGLE' });
+  }
+
+  function resetTimer() {
+    send({ type: 'RESET' });
+  }
 
   return (
     <div
@@ -33,28 +52,28 @@ export const Timer = () => {
       <ProgressCircle />
       <div className="display">
         <div className="label">{state.value}</div>
-        <div className="elapsed" onClick={() => send({ type: 'TOGGLE' })}>
+        <div className="elapsed" onClick={toggleTimer}>
           {Math.ceil(duration - elapsed)}
         </div>
         <div className="controls">
           {state.value !== 'running' && (
-            <button onClick={() => send('RESET')}>Reset</button>
+            <button onClick={resetTimer}>Reset</button>
           )}
 
           {state.value === 'running' && (
-            <button onClick={() => send('ADD_MINUTE')}>+ 1:00</button>
+            <button onClick={addMinute}>+ 1:00</button>
           )}
         </div>
       </div>
       <div className="actions">
         {state.value === 'running' && (
-          <button onClick={() => send({ type: 'TOGGLE' })} title="Pause timer">
+          <button onClick={toggleTimer} title="Pause timer">
             <FontAwesomeIcon icon={faPause} />
           </button>
         )}
 
         {(state.value === 'paused' || state.value === 'idle') && (
-          <button onClick={() => send({ type: 'TOGGLE' })} title="Start timer">
+          <button onClick={toggleTimer} title="Start timer">
             <FontAwesomeIcon icon={faPlay} />
           </button>
         )}
