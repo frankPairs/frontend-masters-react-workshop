@@ -19,19 +19,18 @@ export const timerMachine = createMachine({
     },
     running: {
       on: {
-        // Change this TICK transition into a guarded transition
-        // to go to `expired` when `context.elapsed + context.interval`
-        // is greater than the total `context.duration`.
-        TICK: {
-          actions: assign({
-            elapsed: (ctx) => ctx.elapsed + ctx.interval,
-          }),
-        },
+        TICK: [
+          {
+            actions: 'increaseElapsed',
+            cond: 'isOnTime'
+          },
+          {
+            target: 'expired'
+          }
+        ],
         TOGGLE: 'paused',
         ADD_MINUTE: {
-          actions: assign({
-            duration: (ctx) => ctx.duration + 60,
-          }),
+          actions: 'addOneMinute',
         },
       },
     },
@@ -41,9 +40,36 @@ export const timerMachine = createMachine({
         RESET: 'idle',
       },
     },
-
-    // Add an `expired` state here.
-    // It should go to the `idle` state on the `RESET` event.
-    // ...
+    expired: {
+      on: {
+        RESET: 'idle'
+      }
+    }
+  }
+}, {
+  actions: {
+    'increaseElapsed': assign(increaseElapsed),
+    'addOneMinute': assign(addOneMinute)
   },
+  guards: {
+    'isOnTime': isOnTime
+  }
 });
+
+function isOnTime(context, event) {
+  return context.elapsed < context.duration;
+}
+
+function increaseElapsed(context, event) {
+  return {
+    ...context,
+    elapsed: context.elapsed + context.interval,
+  }
+}
+
+function addOneMinute(context, event) {
+  return {
+    ...context,
+    duration: context.duration + 60,
+  };
+}
