@@ -1,7 +1,5 @@
 import { createMachine, assign } from 'xstate';
 
-const timerExpired = (ctx) => ctx.elapsed >= ctx.duration;
-
 export const timerMachine = createMachine({
   initial: 'idle',
   context: {
@@ -20,33 +18,72 @@ export const timerMachine = createMachine({
       },
     },
     running: {
-      // Add the `normal` and `overtime` nested states here.
-      // Don't forget to add the initial state (`normal`)!
-      // ...
-
+      initial: 'normal',
+      states: {
+        normal: {
+          always: [
+            {
+              target: 'overtime',
+              cond: isTimeExceeded,
+            },
+          ],
+          on: {
+            RESET: undefined
+          }
+        },
+        overtime: {
+          on: {
+            TOGGLE: undefined,
+          }
+        }
+      },
       on: {
         TICK: {
-          actions: assign({
-            elapsed: (ctx) => ctx.elapsed + ctx.interval,
-          }),
+          actions: 'increaseElapsed',
         },
+        RESET: 'idle',
         TOGGLE: 'paused',
         ADD_MINUTE: {
-          actions: assign({
-            duration: (ctx) => ctx.duration + 60,
-          }),
+          actions: 'addOneMinute',
         },
       },
     },
     paused: {
       on: {
         TOGGLE: 'running',
+        RESET: 'idle',
       },
     },
+    expired: {
+      on: {
+        RESET: 'idle'
+      }
+    }
+  }
+}, {
+  actions: {
+    'increaseElapsed': assign(increaseElapsed),
+    'addOneMinute': assign(addOneMinute)
   },
-  on: {
-    RESET: {
-      target: '.idle',
-    },
-  },
+  guards: {
+    'isTimeExceeded': isTimeExceeded
+  }
 });
+
+function isTimeExceeded(context, event) {
+  return context.elapsed + context.interval > context.duration;
+}
+
+function increaseElapsed(context, event) {
+  return {
+    ...context,
+    elapsed: context.elapsed + context.interval,
+  }
+}
+
+function addOneMinute(context, event) {
+  return {
+    ...context,
+    duration: context.duration + 60,
+  };
+}
