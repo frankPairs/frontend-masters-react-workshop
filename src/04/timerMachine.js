@@ -57,7 +57,7 @@ export const timerMachine = createMachine({
 });
 
 function isOnTime(context, event) {
-  return context.elapsed < context.duration;
+  return context.elapsed + context.interval < context.duration;
 }
 
 function increaseElapsed(context, event) {
